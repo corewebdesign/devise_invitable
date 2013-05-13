@@ -24,12 +24,12 @@ module Devise
       attr_accessor :skip_invitation
 
       included do
-        include ::DeviseInvitable::Inviter        
+        include ::DeviseInvitable::Inviter
         belongs_to :invited_by, :polymorphic => true
-        
+
         include ActiveSupport::Callbacks
         define_callbacks :invitation_accepted
-        
+
         attr_writer :skip_password
       end
 
@@ -73,7 +73,7 @@ module Devise
       def valid_password?(password)
         super unless invited?
       end
-      
+
       def reset_password!(new_password, new_password_confirmation)
         super
         accept_invitation!
@@ -128,7 +128,7 @@ module Devise
         # Attributes must contain the user email, other attributes will be set in the record
         def _invite(attributes={}, invited_by=nil, &block)
           invitable = find_or_initialize_with_error_by(invite_key, attributes.delete(invite_key))
-          invitable.assign_attributes(attributes, :as => inviter_role(invited_by))
+          invitable.update_attributes(attributes, :as => inviter_role(invited_by))
           invitable.invited_by = invited_by
 
           invitable.skip_password = true
@@ -145,7 +145,7 @@ module Devise
           end
           [invitable, mail]
         end
-        
+
         # Override this method if the invitable is using Mass Assignment Security
         # and the inviter has a non-default role.
         def inviter_role(inviter)
@@ -181,16 +181,16 @@ module Devise
         def invitation_token
           generate_token(:invitation_token)
         end
-        
+
         # Callback convenience methods
         def before_invitation_accepted(*args, &blk)
           set_callback(:invitation_accepted, :before, *args, &blk)
         end
-        
+
         def after_invitation_accepted(*args, &blk)
           set_callback(:invitation_accepted, :after, *args, &blk)
         end
-        
+
 
         Devise::Models.config(self, :invite_for)
         Devise::Models.config(self, :validate_on_invite)
